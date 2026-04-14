@@ -22,8 +22,13 @@ let state = {
   currentCPM: 0,
 };
 
+<<<<<<< HEAD
 // ── Audio Engine (real MP3 files) ────────────────────────
 const WRONG_SOUNDS = [
+=======
+// ── Audio Engine ─────────────────────────────────────────
+const WRONG_SRCS = [
+>>>>>>> 0834439 (refactor: Simplify audio playback logic and preload audio clips)
   "addon/scream_chicken_tree.mp3",
   "addon/chloo.mp3",
   "addon/uoooo.mp3",
@@ -31,12 +36,32 @@ const WRONG_SOUNDS = [
   "addon/anime_aah.mp3",
 ];
 
+<<<<<<< HEAD
 // Preload all audio
 const wrongAudios = WRONG_SOUNDS.map(src => { const a = new Audio(src); a.preload = "auto"; return a; });
 const levelUpAudio = new Audio("addon/aye.mp3");
 levelUpAudio.preload = "auto";
 
 // Correct key — keep Web Audio API ping (lightweight, instant)
+=======
+// Preload all clips
+const wrongAudios = WRONG_SRCS.map(src => new Audio(src));
+const levelUpAudio = new Audio("addon/aye.mp3");
+
+// Unlock audio on first user gesture (browser autoplay policy)
+let audioUnlocked = false;
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  [...wrongAudios, levelUpAudio].forEach(a => {
+    a.play().then(() => a.pause()).catch(() => {});
+    a.currentTime = 0;
+  });
+}
+document.addEventListener("keydown", unlockAudio, { once: true });
+
+// Correct key — Web Audio API ping (instant, no file latency)
+>>>>>>> 0834439 (refactor: Simplify audio playback logic and preload audio clips)
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx;
 function getAudioCtx() {
