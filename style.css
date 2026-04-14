@@ -57,34 +57,6 @@ body {
   transform-origin: top center;
 }
 
-/* Hand overlays */
-.hand-overlay {
-  position: absolute; bottom: -8px;
-  width: 100px; height: 150px;
-  pointer-events: none; opacity: 0;
-  transition: opacity 0.25s ease-out; z-index: 5;
-}
-.hand-overlay.left-hand  { left: 0;  transform: translateX(-35%); }
-.hand-overlay.right-hand { right: 0; transform: translateX(35%); }
-.keyboard-wrap:hover .left-hand,
-.keyboard-wrap:hover .right-hand { opacity: 0.3; }
-
-.keyboard-wrap:has(#Q:hover) .left-hand,.keyboard-wrap:has(#W:hover) .left-hand,
-.keyboard-wrap:has(#E:hover) .left-hand,.keyboard-wrap:has(#R:hover) .left-hand,
-.keyboard-wrap:has(#T:hover) .left-hand,.keyboard-wrap:has(#A:hover) .left-hand,
-.keyboard-wrap:has(#S:hover) .left-hand,.keyboard-wrap:has(#D:hover) .left-hand,
-.keyboard-wrap:has(#F:hover) .left-hand,.keyboard-wrap:has(#G:hover) .left-hand,
-.keyboard-wrap:has(#Z:hover) .left-hand,.keyboard-wrap:has(#X:hover) .left-hand,
-.keyboard-wrap:has(#C:hover) .left-hand,.keyboard-wrap:has(#V:hover) .left-hand,
-.keyboard-wrap:has(#B:hover) .left-hand { opacity: 1; }
-
-.keyboard-wrap:has(#Y:hover) .right-hand,.keyboard-wrap:has(#U:hover) .right-hand,
-.keyboard-wrap:has(#I:hover) .right-hand,.keyboard-wrap:has(#O:hover) .right-hand,
-.keyboard-wrap:has(#P:hover) .right-hand,.keyboard-wrap:has(#H:hover) .right-hand,
-.keyboard-wrap:has(#J:hover) .right-hand,.keyboard-wrap:has(#K:hover) .right-hand,
-.keyboard-wrap:has(#L:hover) .right-hand,.keyboard-wrap:has(#N:hover) .right-hand,
-.keyboard-wrap:has(#M:hover) .right-hand { opacity: 1; }
-
 /* ── Keyboard ── */
 .keyboard { display: flex; flex-direction: column; }
 .row { list-style: none; display: flex; }

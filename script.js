@@ -264,14 +264,6 @@ function highlightCurrentKey() {
   const el = $(keyId);
   if (el) {
     el.classList.add("selected");
-    // Hand overlay
-    const LEFT_KEYS = new Set([..."QWERTASDFGZXCVB"]);
-    const RIGHT_KEYS = new Set([..."YUIOPHJKLNM"]);
-    const lh = $("left-hand-overlay"), rh = $("right-hand-overlay");
-    if (lh && rh) {
-      lh.style.opacity = LEFT_KEYS.has(ch) ? "0.7" : "0.15";
-      rh.style.opacity = RIGHT_KEYS.has(ch) ? "0.7" : "0.15";
-    }
   }
 }
 
@@ -303,14 +295,6 @@ function targetRandomKey() {
     const el = $(key);
     if (!el) return targetRandomKey();
     el.classList.add("selected");
-    // Hand overlay
-    const LEFT_KEYS = new Set([..."QWERTASDFGZXCVB"]);
-    const RIGHT_KEYS = new Set([..."YUIOPHJKLNM"]);
-    const lh = $("left-hand-overlay"), rh = $("right-hand-overlay");
-    if (lh && rh) {
-      lh.style.opacity = LEFT_KEYS.has(key) ? "0.7" : "0.15";
-      rh.style.opacity = RIGHT_KEYS.has(key) ? "0.7" : "0.15";
-    }
   } else {
     prompt.hidden = false;
     if (!state.currentWord || state.typedIndex >= state.currentWord.length) {
