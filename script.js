@@ -324,6 +324,46 @@ document.addEventListener("keyup", event => {
 
 $("restart-btn").addEventListener("click", resetSession);
 
+// ── Finger guide ─────────────────────────────────────────
+function dismissGuide() {
+  const guide = $("finger-guide");
+  if (!guide.hidden) {
+    if (window.gsap) {
+      gsap.to(guide, { opacity: 0, duration: 0.3, onComplete: () => { guide.hidden = true; } });
+    } else {
+      guide.hidden = true;
+    }
+  }
+}
+$("guide-start-btn").addEventListener("click", dismissGuide);
+
+// ── Keyboard shortcuts ────────────────────────────────────
+document.addEventListener("keydown", event => {
+  if (!event.ctrlKey || !event.shiftKey) return;
+
+  // Ctrl+Shift+N — unlock all levels
+  if (event.key === "N") {
+    event.preventDefault();
+    state.level = LEVELS.length - 1;
+    localStorage.setItem("kb_level", state.level);
+    $("level-name").textContent = LEVELS[state.level].name;
+    if (window.gsap) gsap.fromTo("#level-badge", { scale: 1.3, color: "#fbbf24" }, { scale: 1, color: "#cbb7fb", duration: 0.6, ease: "elastic.out(1,0.5)" });
+  }
+
+  // Ctrl+Shift+L — skip to next level
+  if (event.key === "L") {
+    event.preventDefault();
+    if (state.level < LEVELS.length - 1) {
+      state.level++;
+      localStorage.setItem("kb_level", state.level);
+      playLevelUp();
+      $("level-name").textContent = LEVELS[state.level].name;
+      if (window.gsap) gsap.fromTo("#level-badge", { scale: 1.3, color: "#fbbf24" }, { scale: 1, color: "#cbb7fb", duration: 0.6, ease: "elastic.out(1,0.5)" });
+      resetSession();
+    }
+  }
+});
+
 // ── Init ─────────────────────────────────────────────────
 $("level-name").textContent = LEVELS[state.level].name;
 $("best-value").textContent = getBestCPM() > 0 ? getBestCPM() : "—";

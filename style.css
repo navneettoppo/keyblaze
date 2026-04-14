@@ -263,6 +263,110 @@ li {
   .meme-panel { width: 140px; bottom: 1em; right: 1em; }
 }
 
+/* ── Finger Guide Overlay ── */
+.finger-guide {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 8, 20, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5em;
+  z-index: 20;
+}
+
+.finger-guide[hidden] { display: none; }
+
+.guide-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+}
+
+.guide-hands {
+  display: flex;
+  gap: 2.5em;
+  align-items: flex-start;
+}
+
+.guide-divider {
+  width: 1px;
+  align-self: stretch;
+  background: rgba(203,183,251,0.15);
+}
+
+.guide-hand { display: flex; flex-direction: column; gap: 0.6em; }
+
+.hand-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #cbb7fb;
+  margin-bottom: 0.3em;
+}
+
+.finger-rows { display: flex; flex-direction: column; gap: 0.45em; }
+
+.frow {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+}
+
+.frow b { color: rgba(255,255,255,0.9); font-weight: 600; }
+
+.fdot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.fdot.pinky      { background: #5b2c6f; border: 1px solid #9b59b6; }
+.fdot.ring       { background: #6c3483; border: 1px solid #8e44ad; }
+.fdot.middle     { background: #7d3c98; border: 1px solid #7d3c98; }
+.fdot.pointer1st { background: #8e44ad; border: 1px solid #6c3483; }
+.fdot.pointer2nd { background: #9b59b6; border: 1px solid #5b2c6f; }
+
+.guide-hint {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.05em;
+}
+.guide-hint b { color: rgba(255,255,255,0.7); }
+
+.guide-start-btn {
+  background: transparent;
+  border: 1px solid rgba(203,183,251,0.4);
+  color: #cbb7fb;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 0.75em 2.5em;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease-out, border-color 0.2s ease-out;
+}
+.guide-start-btn:hover { background: rgba(203,183,251,0.1); border-color: #cbb7fb; }
+.guide-start-btn:focus-visible { outline: 2px solid #cbb7fb; outline-offset: 3px; }
+
+.guide-shortcuts {
+  display: flex;
+  gap: 1.5em;
+  font-size: 10px;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 0.05em;
+}
+
 /* ── Animations ── */
 @keyframes vibrate {
   0%   { transform: translate(0); }
