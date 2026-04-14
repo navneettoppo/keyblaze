@@ -22,10 +22,23 @@ let state = {
   currentCPM: 0,
 };
 
-// ── Audio Engine (Web Audio API — no files needed) ───────
+// ── Audio Engine (real MP3 files) ────────────────────────
+const WRONG_SOUNDS = [
+  "addon/scream_chicken_tree.mp3",
+  "addon/chloo.mp3",
+  "addon/uoooo.mp3",
+  "addon/fahhh.mp3",
+  "addon/anime_aah.mp3",
+];
+
+// Preload all audio
+const wrongAudios = WRONG_SOUNDS.map(src => { const a = new Audio(src); a.preload = "auto"; return a; });
+const levelUpAudio = new Audio("addon/aye.mp3");
+levelUpAudio.preload = "auto";
+
+// Correct key — keep Web Audio API ping (lightweight, instant)
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx;
-
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new AudioCtx();
   return audioCtx;
@@ -47,36 +60,16 @@ function playCorrect() {
 
 function playWrong() {
   try {
-    const ctx = getAudioCtx();
-    // Descending "faaahhh" — two oscillators detuned
-    [180, 160].forEach((freq, i) => {
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = "sawtooth";
-      o.connect(g); g.connect(ctx.destination);
-      o.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.05);
-      o.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.4);
-      g.gain.setValueAtTime(0.18, ctx.currentTime + i * 0.05);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
-      o.start(ctx.currentTime + i * 0.05);
-      o.stop(ctx.currentTime + 0.5);
-    });
+    const audio = wrongAudios[Math.floor(Math.random() * wrongAudios.length)];
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
   } catch {}
 }
 
 function playLevelUp() {
   try {
-    const ctx = getAudioCtx();
-    [523, 659, 784, 1047].forEach((freq, i) => {
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.frequency.value = freq;
-      g.gain.setValueAtTime(0.12, ctx.currentTime + i * 0.1);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.1 + 0.15);
-      o.start(ctx.currentTime + i * 0.1);
-      o.stop(ctx.currentTime + i * 0.1 + 0.15);
-    });
+    levelUpAudio.currentTime = 0;
+    levelUpAudio.play().catch(() => {});
   } catch {}
 }
 
