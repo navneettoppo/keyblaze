@@ -201,7 +201,7 @@ li {
   opacity: 1; pointer-events: auto; transform: translateX(0);
 }
 .meme-panel[hidden] { display: none; }
-.meme-panel img { width: 100%; display: block; }
+.meme-panel img { width: 100%; display: block; transition: opacity 0.3s ease-out; }
 
 /* ── Score screen ── */
 .score-screen {

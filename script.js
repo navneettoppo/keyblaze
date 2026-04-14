@@ -163,32 +163,78 @@ function animateNeedle() {
 }
 animateNeedle();
 
-// ── Meme API (Indian + word-based) ───────────────────────
-const INDIAN_SUBS = ["dankindianmemes", "IndianDankMemes", "indiameme", "bollywood"];
+// ── Meme Engine — Reddit trending hot posts ───────────────
+const MEME_SUBS = "memes+dankmemes+IndianDankMemes+dankindianmemes+indiameme";
 const MEME_CACHE_KEY = "kb_memes";
-function getMemeCache() { try { return JSON.parse(localStorage.getItem(MEME_CACHE_KEY) || "[]"); } catch { return []; } }
-function saveMemeCache(m) { try { localStorage.setItem(MEME_CACHE_KEY, JSON.stringify(m.slice(-50))); } catch {} }
 
-async function fetchMeme(query) {
+let memePool = [];
+let memePoolLoading = false;
+const seenMemes = new Set(); // never show same URL twice per session
+
+function getMemeCache() {
   try {
-    // For word/sentence mode, search by word; otherwise random Indian sub
-    const url = query
-      ? `https://meme-api.com/gimme/${encodeURIComponent(query)}`
-      : `https://meme-api.com/gimme/${INDIAN_SUBS[Math.floor(Math.random() * INDIAN_SUBS.length)]}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    if (data.url && !data.nsfw) {
-      const c = getMemeCache(); c.push(data.url); saveMemeCache(c);
-      return data.url;
-    }
-  } catch {}
-  // Fallback: random Indian sub
+    const stored = JSON.parse(localStorage.getItem(MEME_CACHE_KEY) || "{}");
+    const today = new Date().toDateString();
+    // Invalidate if cache is from a previous day
+    if (stored.date !== today) return [];
+    return stored.urls || [];
+  } catch { return []; }
+}
+function saveMemeCache(urls) {
   try {
-    const res = await fetch(`https://meme-api.com/gimme/${INDIAN_SUBS[Math.floor(Math.random() * INDIAN_SUBS.length)]}`);
-    const data = await res.json();
-    if (data.url && !data.nsfw) return data.url;
+    localStorage.setItem(MEME_CACHE_KEY, JSON.stringify({ date: new Date().toDateString(), urls: urls.slice(-80) }));
   } catch {}
-  const cache = getMemeCache();
+}
+
+async function fillMemePool() {
+  if (memePoolLoading || memePool.length > 5) return;
+  memePoolLoading = true;
+  try {
+    const res = await fetch(
+      `https://www.reddit.com/r/${MEME_SUBS}/hot.json?limit=50`,
+      { headers: { "User-Agent": "keyblaze-typing-trainer/1.0" } }
+    );
+    const data = await res.json();
+    const IMG_EXT = /\.(jpg|jpeg|png|gif)(\?|$)/i;
+    const fresh = data.data.children
+      .map(p => p.data)
+      .filter(p => !p.over_18 && IMG_EXT.test(p.url))
+      .map(p => p.url);
+    // Shuffle so order varies each session
+    fresh.sort(() => Math.random() - 0.5);
+    memePool.push(...fresh);
+    saveMemeCache([...getMemeCache(), ...fresh]);
+  } catch {
+    const cache = getMemeCache();
+    if (cache.length) memePool.push(...cache.sort(() => Math.random() - 0.5).slice(0, 20));
+  }
+  memePoolLoading = false;
+}
+
+async function getNextMeme(word) {
+  if (word) {
+    try {
+      const res = await fetch(
+        `https://www.reddit.com/r/${MEME_SUBS}/search.json?q=${encodeURIComponent(word)}&sort=hot&limit=10&restrict_sr=1`,
+        { headers: { "User-Agent": "keyblaze-typing-trainer/1.0" } }
+      );
+      const data = await res.json();
+      const IMG_EXT = /\.(jpg|jpeg|png|gif)(\?|$)/i;
+      const match = data.data.children
+        .map(p => p.data)
+        .find(p => !p.over_18 && IMG_EXT.test(p.url) && !seenMemes.has(p.url));
+      if (match) { seenMemes.add(match.url); return match.url; }
+    } catch {}
+  }
+  if (memePool.length < 3) await fillMemePool();
+  // Skip already-seen URLs
+  while (memePool.length && seenMemes.has(memePool[0])) memePool.shift();
+  if (memePool.length) {
+    const url = memePool.shift();
+    seenMemes.add(url);
+    return url;
+  }
+  const cache = getMemeCache().filter(u => !seenMemes.has(u));
   return cache.length ? cache[Math.floor(Math.random() * cache.length)] : null;
 }
 
@@ -198,36 +244,32 @@ let memeInterval = null;
 function showMeme(url) {
   if (!url) return;
   const panel = $("meme-panel");
-  $("meme-img").src = url;
+  const img = $("meme-img");
+  img.style.opacity = "0";
   panel.hidden = false;
+  img.onload = () => { img.style.opacity = "1"; };
+  img.src = url;
   clearTimeout(memeTimeout);
-  // Use CSS transition instead of GSAP for meme
   requestAnimationFrame(() => panel.classList.add("visible"));
   memeTimeout = setTimeout(() => {
     panel.classList.remove("visible");
     setTimeout(() => { panel.hidden = true; }, 400);
-  }, 4000);
+  }, 5000);
 }
 
-// For key/word levels: show meme every 15 seconds while typing
-function startMemeTimer(wordFn) {
+function startMemeTimer() {
   stopMemeTimer();
-  memeInterval = setInterval(() => {
-    const query = wordFn ? wordFn() : null;
-    fetchMeme(query).then(showMeme);
-  }, 15000);
+  memeInterval = setInterval(() => getNextMeme(null).then(showMeme), 15000);
 }
 
 function stopMemeTimer() {
   if (memeInterval) { clearInterval(memeInterval); memeInterval = null; }
 }
 
-// For intermediate (word/sentence) mode: show meme as word is typed
 function maybeFetchMeme(word) {
   const lvl = LEVELS[state.level];
   if (lvl.mode === "words" || lvl.mode === "sentence") {
-    // Show meme immediately for the typed word
-    fetchMeme(word).then(showMeme);
+    getNextMeme(word).then(showMeme);
   }
 }
 
@@ -366,7 +408,7 @@ function resetSession() {
   // Start 15s meme timer for key levels; word levels use word-based memes
   const lvl = LEVELS[state.level];
   if (lvl.mode === "keys") {
-    startMemeTimer(() => null);
+    startMemeTimer();
   } else {
     stopMemeTimer();
   }
@@ -520,4 +562,6 @@ drawSpeedometer(0);
 targetRandomKey();
 scaleKeyboard();
 // Start 15s meme timer (key levels only; word levels use word-based)
-if (LEVELS[state.level].mode === "keys") startMemeTimer(() => null);
+if (LEVELS[state.level].mode === "keys") startMemeTimer();
+// Pre-fill pool in background
+fillMemePool();
