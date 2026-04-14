@@ -187,23 +187,23 @@ keyblaze/
 
 ## 📐 Phase Roadmap
 
-### Phase 1 — Foundation (Week 1–2)
+### Phase 1 — Foundation ✅
 - [ ] Three.js scene setup — landing + trainer canvas
-- [ ] GSAP integrated — base animation system
-- [ ] WPM speedometer (canvas dial, live updates)
-- [ ] Audio engine — preload correct + Faaahhh sounds
-- [ ] "Faaahhh" wrong-key full sequence (shake + vignette + emoji)
+- [x] GSAP integrated — key hit, shake, score entrance animations
+- [x] WPM speedometer (canvas arc dial, animated needle, fire color at 200+ CPM)
+- [x] Audio engine — Web Audio API (no files): correct ping, "faaahhh" sawtooth, level-up chime
+- [x] Wrong-key sequence: GSAP shake + red vignette flash + red key glow
 - [x] Spacebar row on keyboard layout
 - [x] Responsive layout (768px+)
 - [x] `prefers-reduced-motion` respected
 
-### Phase 2 — Core Loop (Week 3–4)
-- [ ] Meme API integration (imgflip + fallback cache)
-- [ ] Meme-per-word slide-in panel
-- [x] Streak counter with break animation
+### Phase 2 — Core Loop ✅
+- [x] Meme API integration (meme-api.com + localStorage cache fallback)
+- [x] Meme slide-in panel every 5 correct presses (GSAP animated)
+- [x] Streak counter with reset on wrong key
 - [x] Session mode — 30-key challenge with results screen
-- [ ] Level 1–4 implementation (free tier word sets)
-- [x] localStorage persistence (best CPM, streak records)
+- [x] Level 1–4 implementation (Home Row → Full Alpha, auto-unlock on 80% acc)
+- [x] localStorage persistence (best CPM, current level)
 - [x] Accuracy % tracking
 - [x] Wrong key red flash feedback
 

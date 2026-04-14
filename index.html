@@ -5,11 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KeyBlaze</title>
   <link rel="stylesheet" href="./style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 </head>
 <body>
+
+  <!-- Vignette flash for wrong key -->
+  <div class="vignette" id="vignette"></div>
+
   <h2 class="title">Eyes on the screen</h2>
 
-  <div class="keyboard">
+  <!-- Level badge -->
+  <div class="level-badge" id="level-badge">
+    <span id="level-name">Level 1: Home Row</span>
+  </div>
+
+  <div class="keyboard" id="keyboard">
     <ul class="row row-0">
       <li class="pinky" id="esc">ESC</li>
       <li class="pinky" id="1">1</li>
@@ -72,27 +82,30 @@
       <li class="pinky" id="right-shift">SHIFT</li>
     </ul>
     <ul class="row row-4">
-      <li class="pointer2nd spacebar" id="space" style="width:18em">SPACE</li>
+      <li class="pointer2nd spacebar" id="space">SPACE</li>
     </ul>
   </div>
 
-  <!-- Stats bar -->
-  <div class="stats-bar">
-    <div class="stat">
-      <span class="stat-value" id="cpm-value">—</span>
-      <span class="stat-label">CPM</span>
-    </div>
-    <div class="stat">
-      <span class="stat-value" id="accuracy-value">—</span>
-      <span class="stat-label">Accuracy</span>
-    </div>
-    <div class="stat">
-      <span class="stat-value" id="streak-value">0</span>
-      <span class="stat-label">Streak</span>
-    </div>
-    <div class="stat best">
-      <span class="stat-value" id="best-value">—</span>
-      <span class="stat-label">Best CPM</span>
+  <!-- HUD: speedometer + stats -->
+  <div class="hud">
+    <canvas id="speedometer" width="140" height="140"></canvas>
+    <div class="stats-bar">
+      <div class="stat">
+        <span class="stat-value" id="cpm-value">0</span>
+        <span class="stat-label">CPM</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="accuracy-value">—</span>
+        <span class="stat-label">Accuracy</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="streak-value">0</span>
+        <span class="stat-label">Streak</span>
+      </div>
+      <div class="stat best">
+        <span class="stat-value" id="best-value">—</span>
+        <span class="stat-label">Best</span>
+      </div>
     </div>
   </div>
 
@@ -104,7 +117,12 @@
     <span class="session-label" id="session-label">0 / 30</span>
   </div>
 
-  <!-- Score screen (hidden until session ends) -->
+  <!-- Meme panel -->
+  <div class="meme-panel" id="meme-panel" hidden>
+    <img id="meme-img" src="" alt="meme" />
+  </div>
+
+  <!-- Score screen -->
   <div class="score-screen" id="score-screen" hidden>
     <h2 class="score-title">Session Complete</h2>
     <div class="score-grid">
