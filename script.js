@@ -506,6 +506,28 @@ document.addEventListener("keyup", event => {
 
 $("restart-btn").addEventListener("click", resetSession);
 
+// ── Touch: tap keys on mobile ─────────────────────────────
+document.querySelector(".keyboard").addEventListener("touchstart", e => {
+  const li = e.target.closest("li[id]");
+  if (!li) return;
+  e.preventDefault();
+  // Simulate keyup with the key's id
+  const key = li.id === "space" ? " " : li.id;
+  document.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
+}, { passive: false });
+
+// ── Checkpoint click — switch level ──────────────────────
+document.querySelector(".checkpoints").addEventListener("click", e => {
+  const cp = e.target.closest(".cp[data-level]");
+  if (!cp) return;
+  const lvl = parseInt(cp.dataset.level);
+  state.level = lvl;
+  localStorage.setItem("kb_level", lvl);
+  $("level-name").textContent = LEVELS[lvl].name;
+  if (window.gsap) gsap.fromTo("#level-badge", { scale: 1.2, color: "#fbbf24" }, { scale: 1, color: "#cbb7fb", duration: 0.5, ease: "elastic.out(1,0.5)" });
+  resetSession();
+});
+
 // ── Finger guide ─────────────────────────────────────────
 function dismissGuide() {
   const guide = $("finger-guide");
