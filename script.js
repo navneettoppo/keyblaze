@@ -1,46 +1,35 @@
 const keys = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
-
-const timestamps = [];
-
-timestamps.unshift(getTimestamp());
-
-function getRandomNumber(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+let lastTimestamp = null;
 
 function getRandomKey() {
-  return keys[getRandomNumber(0, keys.length-1)]
+  return keys[Math.floor(Math.random() * keys.length)];
 }
 
 function targetRandomKey() {
   const key = document.getElementById(getRandomKey());
   key.classList.add("selected");
-  let start = Date.now()
-}
-
-function getTimestamp() {
-  return Math.floor(Date.now() / 1000)
 }
 
 document.addEventListener("keyup", event => {
-  const keyPressed = String.fromCharCode(event.keyCode);
+  const keyPressed = event.key.toUpperCase();
   const keyElement = document.getElementById(keyPressed);
   const highlightedKey = document.querySelector(".selected");
-  
-  keyElement.classList.add("hit")
-  keyElement.addEventListener('animationend', () => {
-    keyElement.classList.remove("hit")
-  })
-  
-  if (keyPressed === highlightedKey.innerHTML) {
-    timestamps.unshift(getTimestamp());
-    const elapsedTime = timestamps[0] - timestamps[1];
-    console.log(`Character per minute ${60/elapsedTime}`)
+
+  if (keyElement) {
+    keyElement.classList.add("hit");
+    keyElement.addEventListener("animationend", () => keyElement.classList.remove("hit"), { once: true });
+  }
+
+  if (highlightedKey && keyPressed === highlightedKey.id) {
+    const now = Date.now();
+    if (lastTimestamp !== null) {
+      const cpm = Math.round(60000 / (now - lastTimestamp));
+      document.getElementById("cpm-value").textContent = cpm;
+    }
+    lastTimestamp = now;
     highlightedKey.classList.remove("selected");
     targetRandomKey();
-  } 
-})
+  }
+});
 
 targetRandomKey();
