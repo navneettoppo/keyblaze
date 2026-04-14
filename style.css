@@ -192,26 +192,42 @@ li:active {
 }
 .cp-line.done { background: rgba(203,183,251,0.4); }
 
-/* ── Meme panel — hidden off-screen by default ── */
+/* ── Meme panel ── */
 .meme-panel {
-  position: fixed;
-  bottom: clamp(0.8em, 2vw, 1.5em);
-  right: clamp(0.8em, 2vw, 1.5em);
   width: clamp(120px, 18vw, 200px);
   border-radius: 12px; overflow: hidden;
   border: 1px solid rgba(251,191,36,0.4);
   box-shadow: 0 0 20px rgba(251,191,36,0.15);
   z-index: 50;
-  /* start hidden — JS controls visibility */
   opacity: 0; pointer-events: none;
-  transform: translateX(20px);
+  transform: translateY(-8px);
   transition: opacity 0.35s ease-out, transform 0.35s ease-out;
+  /* Desktop: fixed bottom-right */
+  position: fixed;
+  bottom: clamp(0.8em, 2vw, 1.5em);
+  right: clamp(0.8em, 2vw, 1.5em);
 }
 .meme-panel.visible {
-  opacity: 1; pointer-events: auto; transform: translateX(0);
+  opacity: 1; pointer-events: auto; transform: translateY(0);
 }
 .meme-panel[hidden] { display: none; }
 .meme-panel img { width: 100%; display: block; transition: opacity 0.3s ease-out; }
+
+/* Mobile: inline above keyboard, not fixed */
+@media (max-width: 600px) {
+  .meme-panel {
+    position: relative;
+    bottom: auto; right: auto;
+    width: clamp(140px, 55vw, 260px);
+    margin: 0 auto;
+    order: -1; /* flex order — show above keyboard */
+    transform: scaleY(0.95);
+    transform-origin: top center;
+  }
+  .meme-panel.visible {
+    transform: scaleY(1);
+  }
+}
 
 /* ── Score screen ── */
 .score-screen {
