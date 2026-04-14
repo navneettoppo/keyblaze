@@ -64,7 +64,7 @@ function playLevelUp() {
   try { levelUpAudio.currentTime = 0; levelUpAudio.play().catch(() => {}); } catch {}
 }
 
-// ── Speedometer (DPR-aware Canvas) ───────────────────────
+// ── Speedometer (DPR-aware, 88px golden ratio) ───────────
 const canvas = $("speedometer");
 const ctx2d = canvas.getContext("2d");
 let needleAngle = -Math.PI * 0.75;
@@ -72,15 +72,15 @@ let targetAngle = -Math.PI * 0.75;
 
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
-  const size = parseFloat(getComputedStyle(canvas).width) || 140;
+  const size = 88;
   canvas.width = size * dpr;
   canvas.height = size * dpr;
-  ctx2d.scale(dpr, dpr);
   canvas.style.width = size + "px";
   canvas.style.height = size + "px";
+  ctx2d.scale(dpr, dpr);
 }
+
 resizeCanvas();
-window.addEventListener("resize", () => { resizeCanvas(); });
 
 function cpmToAngle(cpm) {
   return -Math.PI * 0.75 + Math.min(cpm / 300, 1) * Math.PI * 1.5;
@@ -193,27 +193,42 @@ async function fetchMeme(query) {
 }
 
 let memeTimeout;
+let memeInterval = null;
+
 function showMeme(url) {
   if (!url) return;
   const panel = $("meme-panel");
   $("meme-img").src = url;
   panel.hidden = false;
   clearTimeout(memeTimeout);
-  if (window.gsap) {
-    gsap.fromTo(panel, { x: 260 }, { x: 0, duration: 0.4, ease: "power3.out" });
-    memeTimeout = setTimeout(() => gsap.to(panel, { x: 260, duration: 0.35, ease: "power2.in", onComplete: () => { panel.hidden = true; } }), 2800);
-  } else {
-    memeTimeout = setTimeout(() => { panel.hidden = true; }, 2800);
-  }
+  // Use CSS transition instead of GSAP for meme
+  requestAnimationFrame(() => panel.classList.add("visible"));
+  memeTimeout = setTimeout(() => {
+    panel.classList.remove("visible");
+    setTimeout(() => { panel.hidden = true; }, 400);
+  }, 4000);
 }
 
-let memeCounter = 0;
+// For key/word levels: show meme every 15 seconds while typing
+function startMemeTimer(wordFn) {
+  stopMemeTimer();
+  memeInterval = setInterval(() => {
+    const query = wordFn ? wordFn() : null;
+    fetchMeme(query).then(showMeme);
+  }, 15000);
+}
+
+function stopMemeTimer() {
+  if (memeInterval) { clearInterval(memeInterval); memeInterval = null; }
+}
+
+// For intermediate (word/sentence) mode: show meme as word is typed
 function maybeFetchMeme(word) {
-  memeCounter++;
   const lvl = LEVELS[state.level];
-  // In word/sentence mode fetch meme based on the word typed
-  const query = (lvl.mode === "words" || lvl.mode === "sentence") ? word : null;
-  if (memeCounter % 5 === 0) fetchMeme(query).then(showMeme);
+  if (lvl.mode === "words" || lvl.mode === "sentence") {
+    // Show meme immediately for the typed word
+    fetchMeme(word).then(showMeme);
+  }
 }
 
 // ── GSAP helpers ─────────────────────────────────────────
@@ -271,6 +286,17 @@ function highlightCurrentKey() {
 function getBestCPM() { return parseInt(localStorage.getItem("kb_best") || "0", 10); }
 function saveBestCPM(cpm) { if (cpm > getBestCPM()) localStorage.setItem("kb_best", cpm); }
 
+function updateCheckpoints() {
+  document.querySelectorAll(".cp").forEach(cp => {
+    const l = parseInt(cp.dataset.level);
+    cp.classList.toggle("active", l === state.level);
+    cp.classList.toggle("done", l < state.level);
+  });
+  document.querySelectorAll(".cp-line").forEach((line, i) => {
+    line.classList.toggle("done", i < state.level);
+  });
+}
+
 function updateUI() {
   const acc = state.total === 0 ? "—" : Math.round((state.correct / state.total) * 100) + "%";
   $("accuracy-value").textContent = acc;
@@ -325,17 +351,26 @@ function endSession() {
   $("final-accuracy").textContent = accNum + "%";
   $("final-streak").textContent = state.bestStreak;
   $("score-screen").hidden = false;
+  stopMemeTimer();
   gsapScoreIn();
 }
 
 function resetSession() {
   Object.assign(state, { lastTs: null, total: 0, correct: 0, streak: 0, bestStreak: 0, sessionCount: 0, cpmReadings: [], currentCPM: 0, currentWord: "", typedIndex: 0 });
-  memeCounter = 0;
   targetAngle = cpmToAngle(0);
   $("score-screen").hidden = true;
   $("cpm-value").textContent = "0";
   $("level-name").textContent = LEVELS[state.level].name;
-  updateUI(); updateProgress();
+  updateUI(); updateProgress(); updateCheckpoints();
+
+  // Start 15s meme timer for key levels; word levels use word-based memes
+  const lvl = LEVELS[state.level];
+  if (lvl.mode === "keys") {
+    startMemeTimer(() => null);
+  } else {
+    stopMemeTimer();
+  }
+
   targetRandomKey();
 }
 
@@ -480,7 +515,9 @@ window.addEventListener("resize", scaleKeyboard);
 $("level-name").textContent = LEVELS[state.level].name;
 $("best-value").textContent = getBestCPM() > 0 ? getBestCPM() : "—";
 updateProgress();
+updateCheckpoints();
 drawSpeedometer(0);
 targetRandomKey();
 scaleKeyboard();
-fetchMeme(null);
+// Start 15s meme timer (key levels only; word levels use word-based)
+if (LEVELS[state.level].mode === "keys") startMemeTimer(() => null);

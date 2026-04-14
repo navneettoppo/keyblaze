@@ -102,10 +102,11 @@ li {
 /* ── HUD ── */
 .hud {
   display: flex; align-items: center;
-  gap: clamp(1em, 3vw, 2.5em);
+  gap: clamp(0.8em, 2vw, 1.5em);
   flex-wrap: wrap; justify-content: center;
 }
-#speedometer { display: block; flex-shrink: 0; }
+/* Golden ratio: speedometer ~88px, stats beside it — 88 * 1.618 ≈ 142px total HUD height */
+#speedometer { display: block; flex-shrink: 0; width: 88px; height: 88px; }
 
 .stats-bar {
   display: flex; gap: clamp(1em, 2.5vw, 2em);
@@ -142,16 +143,62 @@ li {
   letter-spacing: 0.15em; color: rgba(255,255,255,0.3); white-space: nowrap;
 }
 
-/* ── Meme panel ── */
+/* ── Level checkpoints ── */
+.checkpoints {
+  display: flex; align-items: center; gap: 0;
+  max-width: min(500px, 90vw);
+  width: 100%;
+}
+.cp {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  flex-shrink: 0;
+}
+.cp-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.2);
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+.cp.active .cp-dot {
+  background: #cbb7fb;
+  border-color: #cbb7fb;
+  box-shadow: 0 0 8px rgba(203,183,251,0.7);
+}
+.cp.done .cp-dot {
+  background: rgba(203,183,251,0.35);
+  border-color: rgba(203,183,251,0.5);
+}
+.cp-label {
+  font-size: 8px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: rgba(255,255,255,0.2);
+  white-space: nowrap; transition: color 0.3s;
+}
+.cp.active .cp-label { color: #cbb7fb; }
+.cp.done .cp-label   { color: rgba(203,183,251,0.45); }
+.cp-line {
+  flex: 1; height: 1.5px;
+  background: rgba(255,255,255,0.1);
+  transition: background 0.3s;
+}
+.cp-line.done { background: rgba(203,183,251,0.4); }
+
+/* ── Meme panel — hidden off-screen by default ── */
 .meme-panel {
   position: fixed;
   bottom: clamp(0.8em, 2vw, 1.5em);
   right: clamp(0.8em, 2vw, 1.5em);
-  width: clamp(120px, 20vw, 220px);
+  width: clamp(120px, 18vw, 200px);
   border-radius: 12px; overflow: hidden;
   border: 1px solid rgba(251,191,36,0.4);
   box-shadow: 0 0 20px rgba(251,191,36,0.15);
-  transform: translateX(260px); z-index: 50;
+  z-index: 50;
+  /* start hidden — JS controls visibility */
+  opacity: 0; pointer-events: none;
+  transform: translateX(20px);
+  transition: opacity 0.35s ease-out, transform 0.35s ease-out;
+}
+.meme-panel.visible {
+  opacity: 1; pointer-events: auto; transform: translateX(0);
 }
 .meme-panel[hidden] { display: none; }
 .meme-panel img { width: 100%; display: block; }

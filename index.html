@@ -91,7 +91,7 @@
 
   <!-- HUD -->
   <div class="hud">
-    <canvas id="speedometer"></canvas>
+    <canvas id="speedometer" width="88" height="88"></canvas>
     <div class="stats-bar">
       <div class="stat">
         <span class="stat-value" id="cpm-value">0</span>
@@ -110,6 +110,19 @@
         <span class="stat-label">Best</span>
       </div>
     </div>
+  </div>
+
+  <!-- Level checkpoints -->
+  <div class="checkpoints">
+    <div class="cp" data-level="0"><span class="cp-dot"></span><span class="cp-label">Home Row</span></div>
+    <div class="cp-line"></div>
+    <div class="cp" data-level="1"><span class="cp-dot"></span><span class="cp-label">Warm Up</span></div>
+    <div class="cp-line"></div>
+    <div class="cp" data-level="2"><span class="cp-dot"></span><span class="cp-label">Full Alpha</span></div>
+    <div class="cp-line"></div>
+    <div class="cp" data-level="3"><span class="cp-dot"></span><span class="cp-label">Words</span></div>
+    <div class="cp-line"></div>
+    <div class="cp" data-level="4"><span class="cp-dot"></span><span class="cp-label">Sentences</span></div>
   </div>
 
   <div class="session-bar">
