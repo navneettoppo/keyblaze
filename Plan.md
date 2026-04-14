@@ -193,16 +193,19 @@ keyblaze/
 - [ ] WPM speedometer (canvas dial, live updates)
 - [ ] Audio engine — preload correct + Faaahhh sounds
 - [ ] "Faaahhh" wrong-key full sequence (shake + vignette + emoji)
-- [ ] Spacebar row on keyboard layout
-- [ ] Responsive layout (768px+)
+- [x] Spacebar row on keyboard layout
+- [x] Responsive layout (768px+)
+- [x] `prefers-reduced-motion` respected
 
 ### Phase 2 — Core Loop (Week 3–4)
 - [ ] Meme API integration (imgflip + fallback cache)
 - [ ] Meme-per-word slide-in panel
-- [ ] Streak counter with 💔 break animation
-- [ ] Session mode — 30-word challenge with results screen
+- [x] Streak counter with break animation
+- [x] Session mode — 30-key challenge with results screen
 - [ ] Level 1–4 implementation (free tier word sets)
-- [ ] localStorage persistence (best WPM, current level, streak records)
+- [x] localStorage persistence (best CPM, streak records)
+- [x] Accuracy % tracking
+- [x] Wrong key red flash feedback
 
 ### Phase 3 — Progression (Week 5–6)
 - [ ] Level 5–10 word sets + unlock gates

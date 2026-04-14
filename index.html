@@ -2,81 +2,129 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KeyBlaze</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-<h2 class="title">Eyes on the screen</h2>
-<div class="keyboard">
-  <ul class="row row-0">
-    <li class="pinky" id="esc">ESC</li>
-    <li class="pinky" id="1">1</li>
-    <li class="ring" id="2">2</li>
-    <li class="middle" id="3">3</li>
-    <li class="pointer1st" id="4">4</li>
-    <li class="pointer2nd" id="5">5</li>
-    <li class="pointer2nd" id="6">6</li>
-    <li class="pointer1st" id="7">7</li>
-    <li class="middle" id="8">8</li>
-    <li class="ring" id="9">9</li>
-    <li class="pinky" id="10">0</li>
-    <li class="pinky">-</li>
-    <li class="pinky">+</li>
-    <li class="pinky" id="back">BACK</li>
-  </ul>
-  <ul class="row row-1">
-    <li class="pinky" id="tab">TAB</li>
-    <li class="pinky" id="Q">Q</li>
-    <li class="ring" id="W">W</li>
-    <li class="middle" id="E">E</li>
-    <li class="pointer1st" id="R">R</li>
-    <li class="pointer2nd" id="T">T</li>
-    <li class="pointer2nd" id="Y">Y</li>
-    <li class="pointer1st" id="U">U</li>
-    <li class="middle" id="I">I</li>
-    <li class="ring" id="O">O</li>
-    <li class="pinky" id="P">P</li>
-    <li class="pinky">[</li>
-    <li class="pinky">]</li>
-    <li class="pinky">\</li>
-  </ul>
-  <ul class="row row-2">
-    <li class="pinky" id="caps">CAPS</li>
-    <li class="pinky" id="A">A</li>
-    <li class="ring" id="S">S</li>
-    <li class="middle" id="D">D</li>
-    <li class="pointer1st" id="F">F</li>
-    <li class="pointer2nd" id="G">G</li>
-    <li class="pointer2nd" id="H">H</li>
-    <li class="pointer1st" id="J">J</li>
-    <li class="middle" id="K">K</li>
-    <li class="ring" id="L">L</li>
-    <li class="pinky">:</li>
-    <li class="pinky">''</li>
-    <li class="pinky" id="enter">ENTER</li>
-  </ul>
-  <ul class="row row-3">
-    <li class="pinky" id="left-shift">SHIFT</li>
-    <li class="pinky" id="Z">Z</li>
-    <li class="ring" id="X">X</li>
-    <li class="middle" id="C">C</li>
-    <li class="pointer1st" id="V">V</li>
-    <li class="pointer2nd" id="B">B</li>
-    <li class="pointer2nd" id="N">N</li>
-    <li class="pointer1st" id="M">M</li>
-    <li class="middle">,</li>
-    <li class="ring">.</li>
-    <li class="pinky">;</li>
-    <li class="pinky" id="right-shift">SHIFT</li>
-  </ul>
-</div>
+  <h2 class="title">Eyes on the screen</h2>
 
-<div id="cpm-display">
-  <span id="cpm-value">—</span>
-  <span id="cpm-label">chars / min</span>
-</div>
+  <div class="keyboard">
+    <ul class="row row-0">
+      <li class="pinky" id="esc">ESC</li>
+      <li class="pinky" id="1">1</li>
+      <li class="ring" id="2">2</li>
+      <li class="middle" id="3">3</li>
+      <li class="pointer1st" id="4">4</li>
+      <li class="pointer2nd" id="5">5</li>
+      <li class="pointer2nd" id="6">6</li>
+      <li class="pointer1st" id="7">7</li>
+      <li class="middle" id="8">8</li>
+      <li class="ring" id="9">9</li>
+      <li class="pinky" id="10">0</li>
+      <li class="pinky">-</li>
+      <li class="pinky">+</li>
+      <li class="pinky" id="back">BACK</li>
+    </ul>
+    <ul class="row row-1">
+      <li class="pinky" id="tab">TAB</li>
+      <li class="pinky" id="Q">Q</li>
+      <li class="ring" id="W">W</li>
+      <li class="middle" id="E">E</li>
+      <li class="pointer1st" id="R">R</li>
+      <li class="pointer2nd" id="T">T</li>
+      <li class="pointer2nd" id="Y">Y</li>
+      <li class="pointer1st" id="U">U</li>
+      <li class="middle" id="I">I</li>
+      <li class="ring" id="O">O</li>
+      <li class="pinky" id="P">P</li>
+      <li class="pinky">[</li>
+      <li class="pinky">]</li>
+      <li class="pinky">\</li>
+    </ul>
+    <ul class="row row-2">
+      <li class="pinky" id="caps">CAPS</li>
+      <li class="pinky" id="A">A</li>
+      <li class="ring" id="S">S</li>
+      <li class="middle" id="D">D</li>
+      <li class="pointer1st" id="F">F</li>
+      <li class="pointer2nd" id="G">G</li>
+      <li class="pointer2nd" id="H">H</li>
+      <li class="pointer1st" id="J">J</li>
+      <li class="middle" id="K">K</li>
+      <li class="ring" id="L">L</li>
+      <li class="pinky">:</li>
+      <li class="pinky">''</li>
+      <li class="pinky" id="enter">ENTER</li>
+    </ul>
+    <ul class="row row-3">
+      <li class="pinky" id="left-shift">SHIFT</li>
+      <li class="pinky" id="Z">Z</li>
+      <li class="ring" id="X">X</li>
+      <li class="middle" id="C">C</li>
+      <li class="pointer1st" id="V">V</li>
+      <li class="pointer2nd" id="B">B</li>
+      <li class="pointer2nd" id="N">N</li>
+      <li class="pointer1st" id="M">M</li>
+      <li class="middle">,</li>
+      <li class="ring">.</li>
+      <li class="pinky">;</li>
+      <li class="pinky" id="right-shift">SHIFT</li>
+    </ul>
+    <ul class="row row-4">
+      <li class="pointer2nd spacebar" id="space" style="width:18em">SPACE</li>
+    </ul>
+  </div>
 
-<h2 class="title">Hands on the keyboard</h2>
-<script src="./script.js"></script>
+  <!-- Stats bar -->
+  <div class="stats-bar">
+    <div class="stat">
+      <span class="stat-value" id="cpm-value">—</span>
+      <span class="stat-label">CPM</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="accuracy-value">—</span>
+      <span class="stat-label">Accuracy</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value" id="streak-value">0</span>
+      <span class="stat-label">Streak</span>
+    </div>
+    <div class="stat best">
+      <span class="stat-value" id="best-value">—</span>
+      <span class="stat-label">Best CPM</span>
+    </div>
+  </div>
+
+  <!-- Session progress -->
+  <div class="session-bar">
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <span class="session-label" id="session-label">0 / 30</span>
+  </div>
+
+  <!-- Score screen (hidden until session ends) -->
+  <div class="score-screen" id="score-screen" hidden>
+    <h2 class="score-title">Session Complete</h2>
+    <div class="score-grid">
+      <div class="score-item">
+        <span class="score-num" id="final-cpm">—</span>
+        <span class="score-sub">avg CPM</span>
+      </div>
+      <div class="score-item">
+        <span class="score-num" id="final-accuracy">—</span>
+        <span class="score-sub">accuracy</span>
+      </div>
+      <div class="score-item">
+        <span class="score-num" id="final-streak">—</span>
+        <span class="score-sub">best streak</span>
+      </div>
+    </div>
+    <button class="restart-btn" id="restart-btn">Play Again</button>
+  </div>
+
+  <h2 class="title">Hands on the keyboard</h2>
+  <script src="./script.js"></script>
 </body>
 </html>
