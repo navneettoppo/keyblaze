@@ -538,8 +538,8 @@ $("guide-start-btn").addEventListener("click", dismissGuide);
 
 // ── Keyboard shortcuts ────────────────────────────────────
 document.addEventListener("keydown", event => {
-  if (!event.ctrlKey || !event.shiftKey) return;
-  if (event.key === "N") {
+  if (!event.ctrlKey || event.shiftKey) return;
+  if (event.key === "n") {
     event.preventDefault();
     state.level = LEVELS.length - 1;
     localStorage.setItem("kb_level", state.level);
@@ -547,7 +547,7 @@ document.addEventListener("keydown", event => {
     if (window.gsap) gsap.fromTo("#level-badge", { scale: 1.3, color: "#fbbf24" }, { scale: 1, color: "#cbb7fb", duration: 0.6, ease: "elastic.out(1,0.5)" });
     resetSession();
   }
-  if (event.key === "L") {
+  if (event.key === "l") {
     event.preventDefault();
     if (state.level < LEVELS.length - 1) {
       state.level++;
