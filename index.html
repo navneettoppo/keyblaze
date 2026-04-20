@@ -13,8 +13,20 @@
 
   <h2 class="title">Eyes on the screen</h2>
 
+  <div style="position:relative">
   <div class="level-badge" id="level-badge">
     <span id="level-name">Level 1: Home Row</span>
+    <svg id="level-chevron" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </div>
+
+  <!-- Level selector dropdown -->
+  <div class="level-dropdown" id="level-dropdown" hidden>
+    <div class="level-option" data-level="0">Level 1: Home Row</div>
+    <div class="level-option" data-level="1">Level 2: Warming Up</div>
+    <div class="level-option" data-level="2">Level 3: Full Alpha</div>
+    <div class="level-option" data-level="3">Level 4: Words</div>
+    <div class="level-option" data-level="4">Level 5: Sentences</div>
+  </div>
   </div>
 
   <!-- Word prompt for intermediate/sentence level -->

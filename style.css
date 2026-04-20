@@ -33,7 +33,33 @@ body {
   border: 1px solid rgba(203,183,251,0.25);
   padding: 4px 14px; border-radius: 20px;
   background: rgba(203,183,251,0.06);
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+  user-select: none; transition: border-color 0.2s, background 0.2s;
 }
+.level-badge:hover { border-color: rgba(203,183,251,0.5); background: rgba(203,183,251,0.12); }
+#level-chevron { flex-shrink: 0; transition: transform 0.2s; }
+.level-badge.open #level-chevron { transform: rotate(180deg); }
+
+.level-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%; transform: translateX(-50%);
+  background: #1b1938;
+  border: 1px solid rgba(203,183,251,0.25);
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 200;
+  min-width: 180px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.level-option {
+  padding: 9px 16px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
+  text-transform: uppercase; color: rgba(255,255,255,0.5);
+  cursor: pointer; transition: background 0.15s, color 0.15s;
+}
+.level-option:hover { background: rgba(203,183,251,0.1); color: #cbb7fb; }
+.level-option.active { color: #cbb7fb; background: rgba(203,183,251,0.08); }
 
 /* ── Word prompt ── */
 .word-prompt {

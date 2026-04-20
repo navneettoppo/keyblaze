@@ -163,79 +163,21 @@ function animateNeedle() {
 }
 animateNeedle();
 
-// ── Meme Engine — Reddit trending hot posts ───────────────
-const MEME_SUBS = "memes+dankmemes+IndianDankMemes+dankindianmemes+indiameme";
-const MEME_CACHE_KEY = "kb_memes";
+// ── Meme Engine — meme-api.com ────────────────────────────
+const MEME_SUBS = ["memes", "dankmemes", "IndianDankMemes", "dankindianmemes"];
+const seenMemes = new Set();
 
-let memePool = [];
-let memePoolLoading = false;
-const seenMemes = new Set(); // never show same URL twice per session
-
-function getMemeCache() {
+async function getNextMeme() {
+  const sub = MEME_SUBS[Math.floor(Math.random() * MEME_SUBS.length)];
   try {
-    const stored = JSON.parse(localStorage.getItem(MEME_CACHE_KEY) || "{}");
-    const today = new Date().toDateString();
-    // Invalidate if cache is from a previous day
-    if (stored.date !== today) return [];
-    return stored.urls || [];
-  } catch { return []; }
-}
-function saveMemeCache(urls) {
-  try {
-    localStorage.setItem(MEME_CACHE_KEY, JSON.stringify({ date: new Date().toDateString(), urls: urls.slice(-80) }));
-  } catch {}
-}
-
-async function fillMemePool() {
-  if (memePoolLoading || memePool.length > 5) return;
-  memePoolLoading = true;
-  try {
-    const res = await fetch(
-      `https://www.reddit.com/r/${MEME_SUBS}/hot.json?limit=50`,
-      { headers: { "User-Agent": "keyblaze-typing-trainer/1.0" } }
-    );
+    const res = await fetch(`https://meme-api.com/gimme/${sub}`);
     const data = await res.json();
-    const IMG_EXT = /\.(jpg|jpeg|png|gif)(\?|$)/i;
-    const fresh = data.data.children
-      .map(p => p.data)
-      .filter(p => !p.over_18 && IMG_EXT.test(p.url))
-      .map(p => p.url);
-    // Shuffle so order varies each session
-    fresh.sort(() => Math.random() - 0.5);
-    memePool.push(...fresh);
-    saveMemeCache([...getMemeCache(), ...fresh]);
-  } catch {
-    const cache = getMemeCache();
-    if (cache.length) memePool.push(...cache.sort(() => Math.random() - 0.5).slice(0, 20));
-  }
-  memePoolLoading = false;
-}
-
-async function getNextMeme(word) {
-  if (word) {
-    try {
-      const res = await fetch(
-        `https://www.reddit.com/r/${MEME_SUBS}/search.json?q=${encodeURIComponent(word)}&sort=hot&limit=10&restrict_sr=1`,
-        { headers: { "User-Agent": "keyblaze-typing-trainer/1.0" } }
-      );
-      const data = await res.json();
-      const IMG_EXT = /\.(jpg|jpeg|png|gif)(\?|$)/i;
-      const match = data.data.children
-        .map(p => p.data)
-        .find(p => !p.over_18 && IMG_EXT.test(p.url) && !seenMemes.has(p.url));
-      if (match) { seenMemes.add(match.url); return match.url; }
-    } catch {}
-  }
-  if (memePool.length < 3) await fillMemePool();
-  // Skip already-seen URLs
-  while (memePool.length && seenMemes.has(memePool[0])) memePool.shift();
-  if (memePool.length) {
-    const url = memePool.shift();
-    seenMemes.add(url);
-    return url;
-  }
-  const cache = getMemeCache().filter(u => !seenMemes.has(u));
-  return cache.length ? cache[Math.floor(Math.random() * cache.length)] : null;
+    if (data.url && !data.nsfw && !seenMemes.has(data.url)) {
+      seenMemes.add(data.url);
+      return data.url;
+    }
+  } catch {}
+  return null;
 }
 
 let memeTimeout;
@@ -259,7 +201,7 @@ function showMeme(url) {
 
 function startMemeTimer() {
   stopMemeTimer();
-  memeInterval = setInterval(() => getNextMeme(null).then(showMeme), 15000);
+  memeInterval = setInterval(() => getNextMeme().then(showMeme), 15000);
 }
 
 function stopMemeTimer() {
@@ -269,7 +211,7 @@ function stopMemeTimer() {
 function maybeFetchMeme(word) {
   const lvl = LEVELS[state.level];
   if (lvl.mode === "words" || lvl.mode === "sentence") {
-    getNextMeme(word).then(showMeme);
+    getNextMeme().then(showMeme);
   }
 }
 
@@ -526,6 +468,42 @@ document.querySelector(".checkpoints").addEventListener("click", e => {
   $("level-name").textContent = LEVELS[lvl].name;
   if (window.gsap) gsap.fromTo("#level-badge", { scale: 1.2, color: "#fbbf24" }, { scale: 1, color: "#cbb7fb", duration: 0.5, ease: "elastic.out(1,0.5)" });
   resetSession();
+});
+
+// ── Level dropdown toggle ─────────────────────────────────
+const levelBadge = $("level-badge");
+const levelDropdown = $("level-dropdown");
+
+levelBadge.addEventListener("click", e => {
+  e.stopPropagation();
+  const isOpen = !levelDropdown.hidden;
+  levelDropdown.hidden = isOpen;
+  levelBadge.classList.toggle("open", !isOpen);
+  if (!isOpen) {
+    document.querySelectorAll(".level-option").forEach(opt => {
+      opt.classList.toggle("active", parseInt(opt.dataset.level) === state.level);
+    });
+  }
+});
+
+levelDropdown.addEventListener("click", e => {
+  const opt = e.target.closest(".level-option");
+  if (!opt) return;
+  const lvl = parseInt(opt.dataset.level);
+  state.level = lvl;
+  localStorage.setItem("kb_level", lvl);
+  $("level-name").textContent = LEVELS[lvl].name;
+  if (window.gsap) gsap.fromTo("#level-badge", { scale: 1.2, color: "#fbbf24" }, { scale: 1, color: "#cbb7fb", duration: 0.5, ease: "elastic.out(1,0.5)" });
+  levelDropdown.hidden = true;
+  levelBadge.classList.remove("open");
+  resetSession();
+});
+
+document.addEventListener("click", () => {
+  if (!levelDropdown.hidden) {
+    levelDropdown.hidden = true;
+    levelBadge.classList.remove("open");
+  }
 });
 
 // ── Finger guide ─────────────────────────────────────────
