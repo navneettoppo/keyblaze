@@ -228,7 +228,6 @@ li:active {
   opacity: 0; pointer-events: none;
   transform: translateY(-8px);
   transition: opacity 0.35s ease-out, transform 0.35s ease-out;
-  /* Desktop: fixed bottom-right */
   position: fixed;
   bottom: clamp(0.8em, 2vw, 1.5em);
   right: clamp(0.8em, 2vw, 1.5em);
@@ -236,24 +235,7 @@ li:active {
 .meme-panel.visible {
   opacity: 1; pointer-events: auto; transform: translateY(0);
 }
-.meme-panel[hidden] { display: none; }
 .meme-panel img { width: 100%; display: block; transition: opacity 0.3s ease-out; }
-
-/* Mobile: inline above keyboard, not fixed */
-@media (max-width: 600px) {
-  .meme-panel {
-    position: relative;
-    bottom: auto; right: auto;
-    width: clamp(140px, 55vw, 260px);
-    margin: 0 auto;
-    order: -1; /* flex order — show above keyboard */
-    transform: scaleY(0.95);
-    transform-origin: top center;
-  }
-  .meme-panel.visible {
-    transform: scaleY(1);
-  }
-}
 
 /* ── Score screen ── */
 .score-screen {

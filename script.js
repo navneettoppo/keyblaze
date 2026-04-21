@@ -1,16 +1,20 @@
 // ── Levels ──────────────────────────────────────────────
 const LEVELS = [
   { name: "Level 1: Home Row",    mode: "keys",     keys: [..."ASDFGHJKL"] },
-  { name: "Level 2: Warming Up",  mode: "keys",     keys: [..."ASDFGHJKLEI"] },
+  { name: "Level 2: Warming Up",  mode: "keys",     keys: [..."ASDFGHJKLQWERUIOPYTZXCVBNM"] },
   { name: "Level 3: Full Alpha",  mode: "keys",     keys: [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"] },
-  { name: "Level 4: Words",       mode: "words",    words: ["type","fast","keys","blaze","fire","code","play","game","win","run","jump","flow","mind","hand","skill","speed","focus","train","level","score"] },
-  { name: "Level 5: Sentences",   mode: "sentence", sentences: [
-    "the quick brown fox jumps over the lazy dog",
-    "practice makes perfect every single day",
-    "keep your eyes on the screen and fingers on keys",
-    "speed comes from accuracy not from rushing",
-    "type with confidence and never look down",
+  { name: "Level 4: Words",       mode: "words",    words: [
+    // covers every letter of the alphabet, psychology-habit loop words
+    "blaze","quick","jumpy","vexed","fritz","woken","squad","proxy",
+    "focus","grind","habit","input","jazzy","knack","logic","mixed",
+    "nexus","oxide","pivot","query","reflex","synth","track","ultra",
+    "valor","wired","xenon","yield","zonal","adapt","boost","craft",
+    "drive","excel","forge","grasp","hinge","index","joint","kinetic",
+    "learn","motor","nerve","output","power","quest","rapid","skill",
+    "tempo","unify","vivid","watch","exact","young","zest"
   ]},
+  { name: "Level 5: Sentences",   mode: "sentence", sentences: [], dynamic: "quotes" },
+  { name: "Level 6: Jokes",       mode: "sentence", sentences: [], dynamic: "jokes" },
 ];
 
 const SESSION_LENGTH = 30;
@@ -163,21 +167,69 @@ function animateNeedle() {
 }
 animateNeedle();
 
-// ── Meme Engine — meme-api.com ────────────────────────────
-const MEME_SUBS = ["memes", "dankmemes", "IndianDankMemes", "dankindianmemes"];
+// ── Dynamic Content Loader ────────────────────────────────
+const DAILY_KEY = "kb_daily_" + new Date().toDateString();
+
+async function loadDailyQuotes() {
+  const cached = localStorage.getItem(DAILY_KEY + "_quotes");
+  if (cached) { LEVELS[4].sentences = JSON.parse(cached); return; }
+  try {
+    const res = await fetch("https://api.quotable.io/quotes/random?limit=20&maxLength=80");
+    const data = await res.json();
+    const quotes = data.map(q => q.content.toLowerCase().replace(/[^a-z0-9 .,!?'-]/g, ""));
+    LEVELS[4].sentences = quotes;
+    localStorage.setItem(DAILY_KEY + "_quotes", JSON.stringify(quotes));
+  } catch {
+    LEVELS[4].sentences = [
+      "the quick brown fox jumps over the lazy dog",
+      "practice makes perfect every single day",
+      "speed comes from accuracy not from rushing",
+      "keep your eyes on the screen and fingers on keys",
+      "type with confidence and never look down",
+    ];
+  }
+}
+
+async function loadJokes() {
+  const cached = localStorage.getItem(DAILY_KEY + "_jokes");
+  if (cached) { LEVELS[5].sentences = JSON.parse(cached); return; }
+  try {
+    const res = await fetch("https://official-joke-api.appspot.com/jokes/ten");
+    const data = await res.json();
+    const jokes = data.map(j => (j.setup + " " + j.punchline).toLowerCase().replace(/[^a-z0-9 .,!?'-]/g, ""));
+    LEVELS[5].sentences = jokes;
+    localStorage.setItem(DAILY_KEY + "_jokes", JSON.stringify(jokes));
+  } catch {
+    LEVELS[5].sentences = [
+      "why do programmers prefer dark mode because light attracts bugs",
+      "i told my keyboard a joke but it did not laugh it was too key board",
+      "why was the computer cold because it left its windows open",
+      "what do you call a fish without eyes a fsh",
+      "why do cows wear bells because their horns do not work",
+    ];
+  }
+}
+
+// ── Meme Engine — multi-source with fallbacks ─────────────
 const seenMemes = new Set();
 
 async function getNextMeme() {
-  const sub = MEME_SUBS[Math.floor(Math.random() * MEME_SUBS.length)];
-  try {
-    const res = await fetch(`https://meme-api.com/gimme/${sub}`);
-    const data = await res.json();
-    if (data.url && !data.nsfw && !seenMemes.has(data.url)) {
-      seenMemes.add(data.url);
-      return data.url;
-    }
-  } catch {}
-  return null;
+  // Try multiple sources in order
+  const sources = [
+    () => fetch("https://meme-api.com/gimme").then(r => r.json()).then(d => (!d.nsfw && /\.(jpg|jpeg|png|gif)/i.test(d.url)) ? d.url : null),
+    () => fetch("https://api.imgflip.com/get_memes").then(r => r.json()).then(d => {
+      const memes = d.data.memes.filter(m => !seenMemes.has(m.url));
+      return memes.length ? memes[Math.floor(Math.random() * memes.length)].url : null;
+    }),
+    () => Promise.resolve(`https://picsum.photos/seed/${Date.now()}/400/300`),
+  ];
+  for (const src of sources) {
+    try {
+      const url = await src();
+      if (url && !seenMemes.has(url)) { seenMemes.add(url); return url; }
+    } catch {}
+  }
+  return `https://picsum.photos/seed/${Math.random()}/400/300`;
 }
 
 let memeTimeout;
@@ -188,14 +240,18 @@ function showMeme(url) {
   const panel = $("meme-panel");
   const img = $("meme-img");
   img.style.opacity = "0";
-  panel.hidden = false;
-  img.onload = () => { img.style.opacity = "1"; };
   img.src = url;
+  img.onload = () => {
+    img.style.opacity = "1";
+    panel.classList.add("visible");
+  };
+  img.onerror = () => {
+    // fallback to picsum on load error
+    img.src = `https://picsum.photos/seed/${Date.now()}/400/300`;
+  };
   clearTimeout(memeTimeout);
-  requestAnimationFrame(() => panel.classList.add("visible"));
   memeTimeout = setTimeout(() => {
     panel.classList.remove("visible");
-    setTimeout(() => { panel.hidden = true; }, 400);
   }, 5000);
 }
 
@@ -208,11 +264,8 @@ function stopMemeTimer() {
   if (memeInterval) { clearInterval(memeInterval); memeInterval = null; }
 }
 
-function maybeFetchMeme(word) {
-  const lvl = LEVELS[state.level];
-  if (lvl.mode === "words" || lvl.mode === "sentence") {
-    getNextMeme().then(showMeme);
-  }
+function maybeFetchMeme() {
+  getNextMeme().then(showMeme);
 }
 
 // ── GSAP helpers ─────────────────────────────────────────
@@ -234,7 +287,9 @@ function getNextWord() {
   const lvl = LEVELS[state.level];
   if (lvl.mode === "words") return lvl.words[Math.floor(Math.random() * lvl.words.length)].toUpperCase();
   if (lvl.mode === "sentence") {
-    const s = lvl.sentences[Math.floor(Math.random() * lvl.sentences.length)];
+    const pool = lvl.sentences;
+    if (!pool.length) return "LOADING PLEASE WAIT".toUpperCase();
+    const s = pool[Math.floor(Math.random() * pool.length)];
     return s.toUpperCase();
   }
   return "";
@@ -322,7 +377,7 @@ function endSession() {
   const accNum = state.total === 0 ? 0 : Math.round((state.correct / state.total) * 100);
   saveBestCPM(avgCPM);
 
-  const thresholds = [15, 20, 30, 40, 50];
+  const thresholds = [15, 20, 30, 40, 50, 60];
   if (state.level < LEVELS.length - 1 && accNum >= 80 && avgCPM >= thresholds[state.level]) {
     state.level = Math.min(state.level + 1, LEVELS.length - 1);
     localStorage.setItem("kb_level", state.level);
@@ -347,13 +402,8 @@ function resetSession() {
   $("level-name").textContent = LEVELS[state.level].name;
   updateUI(); updateProgress(); updateCheckpoints();
 
-  // Start 15s meme timer for key levels; word levels use word-based memes
-  const lvl = LEVELS[state.level];
-  if (lvl.mode === "keys") {
-    startMemeTimer();
-  } else {
-    stopMemeTimer();
-  }
+  // Start meme timer for all levels
+  startMemeTimer();
 
   targetRandomKey();
 }
@@ -381,7 +431,7 @@ document.addEventListener("keyup", event => {
       if (state.streak > state.bestStreak) state.bestStreak = state.streak;
       state.sessionCount++;
       playCorrect();
-      maybeFetchMeme(keyPressed);
+      maybeFetchMeme();
       const now = Date.now();
       if (state.lastTs !== null) {
         const cpm = Math.round(60000 / (now - state.lastTs));
@@ -428,7 +478,7 @@ document.addEventListener("keyup", event => {
       // Word completed
       if (state.typedIndex >= state.currentWord.length) {
         state.sessionCount++;
-        maybeFetchMeme(state.currentWord.toLowerCase().split(" ")[0]);
+        maybeFetchMeme();
         updateUI(); updateProgress();
         if (state.sessionCount >= SESSION_LENGTH) { endSession(); return; }
         state.currentWord = getNextWord();
@@ -554,6 +604,8 @@ function scaleKeyboard() {
 window.addEventListener("resize", scaleKeyboard);
 
 // ── Init ─────────────────────────────────────────────────
+loadDailyQuotes();
+loadJokes();
 $("level-name").textContent = LEVELS[state.level].name;
 $("best-value").textContent = getBestCPM() > 0 ? getBestCPM() : "—";
 updateProgress();
@@ -561,7 +613,5 @@ updateCheckpoints();
 drawSpeedometer(0);
 targetRandomKey();
 scaleKeyboard();
-// Start 15s meme timer (key levels only; word levels use word-based)
-if (LEVELS[state.level].mode === "keys") startMemeTimer();
-// Pre-fill pool in background
-fillMemePool();
+// Start meme timer for all levels
+startMemeTimer();
