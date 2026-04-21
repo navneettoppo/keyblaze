@@ -210,26 +210,52 @@ async function loadJokes() {
   }
 }
 
-// ── Meme Engine — multi-source with fallbacks ─────────────
+// ── Meme Engine — multi-source, browser-safe ─────────────
 const seenMemes = new Set();
+let imgflipMemes = [];
+
+// Pre-fetch imgflip meme template list (i.imgflip.com CDN — no CORS issues)
+fetch("https://api.imgflip.com/get_memes")
+  .then(r => r.json())
+  .then(d => { imgflipMemes = d.data.memes.map(m => m.url); })
+  .catch(() => {});
+
+// Memegen.link: pure URL-based meme images, no fetch/CORS needed
+const MEMEGEN_TEMPLATES = [
+  "doge","drake","buzz","distracted","change-my-mind","two-buttons",
+  "uno-reverse","this-is-fine","hide-the-pain","success","bad-luck-brian",
+  "first-world-problems","ancient-aliens","grumpy-cat","philosoraptor"
+];
+const MEMEGEN_TEXTS = [
+  ["when you type","without looking down"],
+  ["me after level 1","me after level 5"],
+  ["fingers on home row","fingers everywhere else"],
+  ["typing speed 20 wpm","typing speed 200 wpm"],
+  ["practice every day","become a keyboard god"],
+  ["ctrl n","unlocks all levels"],
+  ["one more session","said every typist ever"],
+  ["accuracy matters","speed follows"],
+];
+
+function getMemegenUrl() {
+  const tpl = MEMEGEN_TEMPLATES[Math.floor(Math.random() * MEMEGEN_TEMPLATES.length)];
+  const txt = MEMEGEN_TEXTS[Math.floor(Math.random() * MEMEGEN_TEXTS.length)];
+  const top = encodeURIComponent(txt[0]).replace(/%20/g, "_");
+  const bot = encodeURIComponent(txt[1]).replace(/%20/g, "_");
+  return `https://api.memegen.link/images/${tpl}/${top}/${bot}.jpg?width=400`;
+}
 
 async function getNextMeme() {
-  // Try multiple sources in order
-  const sources = [
-    () => fetch("https://meme-api.com/gimme").then(r => r.json()).then(d => (!d.nsfw && /\.(jpg|jpeg|png|gif)/i.test(d.url)) ? d.url : null),
-    () => fetch("https://api.imgflip.com/get_memes").then(r => r.json()).then(d => {
-      const memes = d.data.memes.filter(m => !seenMemes.has(m.url));
-      return memes.length ? memes[Math.floor(Math.random() * memes.length)].url : null;
-    }),
-    () => Promise.resolve(`https://picsum.photos/seed/${Date.now()}/400/300`),
-  ];
-  for (const src of sources) {
-    try {
-      const url = await src();
-      if (url && !seenMemes.has(url)) { seenMemes.add(url); return url; }
-    } catch {}
+  // 1. Try imgflip CDN (direct image URLs, no CORS)
+  if (imgflipMemes.length) {
+    const unseen = imgflipMemes.filter(u => !seenMemes.has(u));
+    const pool = unseen.length ? unseen : imgflipMemes;
+    const url = pool[Math.floor(Math.random() * pool.length)];
+    seenMemes.add(url);
+    return url;
   }
-  return `https://picsum.photos/seed/${Math.random()}/400/300`;
+  // 2. Fallback: memegen.link (URL-based, always works)
+  return getMemegenUrl();
 }
 
 let memeTimeout;
@@ -239,20 +265,14 @@ function showMeme(url) {
   if (!url) return;
   const panel = $("meme-panel");
   const img = $("meme-img");
+  console.log("Meme URL:", url);
   img.style.opacity = "0";
+  panel.classList.remove("visible");
+  img.onload = () => { console.log("Meme loaded"); img.style.opacity = "1"; panel.classList.add("visible"); };
+  img.onerror = () => { console.log("Meme failed, using fallback"); img.src = getMemegenUrl(); };
   img.src = url;
-  img.onload = () => {
-    img.style.opacity = "1";
-    panel.classList.add("visible");
-  };
-  img.onerror = () => {
-    // fallback to picsum on load error
-    img.src = `https://picsum.photos/seed/${Date.now()}/400/300`;
-  };
   clearTimeout(memeTimeout);
-  memeTimeout = setTimeout(() => {
-    panel.classList.remove("visible");
-  }, 5000);
+  memeTimeout = setTimeout(() => panel.classList.remove("visible"), 6000);
 }
 
 function startMemeTimer() {
@@ -613,5 +633,28 @@ updateCheckpoints();
 drawSpeedometer(0);
 targetRandomKey();
 scaleKeyboard();
+// Show first meme immediately, then start timer
+getNextMeme().then(showMeme);
 // Start meme timer for all levels
 startMemeTimer();
+
+// Debug: manual meme trigger
+$("test-meme-btn").addEventListener("click", () => getNextMeme().then(showMeme));
+
+// ── Theme toggle ──────────────────────────────────────────
+const themeToggle = $("theme-toggle");
+const savedTheme = localStorage.getItem("kb_theme") || "dark";
+document.documentElement.setAttribute("data-theme", savedTheme);
+themeToggle.innerHTML = savedTheme === "dark" 
+  ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+  : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+
+themeToggle.addEventListener("click", () => {
+  const current = document.documentElement.getAttribute("data-theme");
+  const next = current === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("kb_theme", next);
+  themeToggle.innerHTML = next === "dark"
+    ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+    : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+});
